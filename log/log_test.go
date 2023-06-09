@@ -21,7 +21,7 @@ package log_test
 import (
 	"testing"
 
-	"github.com/marmotedu/log"
+	"github.com/betatang/toolkit/log"
 )
 
 func Test_WithName(t *testing.T) {
