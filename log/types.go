@@ -25,9 +25,7 @@ import (
 
 // Defines common log fields.
 const (
-	KeyRequestID   string = "requestID"
-	KeyUsername    string = "username"
-	KeyWatcherName string = "watcher"
+	KeyRequestID string = "requestID"
 )
 
 // Field is an alias for the field structure in the underlying log frame.
@@ -107,3 +105,17 @@ var (
 	Uintptr     = zap.Uintptr
 	Uintptrs    = zap.Uintptrs
 )
+
+var (
+	timeEncoderTs   = "ts"
+	timeEncoderTms  = "tms"
+	timeEncoderTns  = "tns"
+	timeEncoderDate = "date"
+)
+
+var StringToEncoderTime = map[string]zapcore.TimeEncoder{
+	timeEncoderTs:   zapcore.EpochTimeEncoder,
+	timeEncoderTms:  zapcore.EpochMillisTimeEncoder,
+	timeEncoderTns:  zapcore.EpochNanosTimeEncoder,
+	timeEncoderDate: timeEncoder,
+}

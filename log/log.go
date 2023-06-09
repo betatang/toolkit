@@ -221,10 +221,14 @@ func New(opts *Options) *zapLogger {
 	if err := zapLevel.UnmarshalText([]byte(opts.Level)); err != nil {
 		zapLevel = zapcore.InfoLevel
 	}
-	encodeLevel := zapcore.CapitalLevelEncoder
+	encodeLevel := zapcore.LowercaseLevelEncoder
 	// when output to local path, with color is forbidden
 	if opts.Format == consoleFormat && opts.EnableColor {
-		encodeLevel = zapcore.CapitalColorLevelEncoder
+		encodeLevel = zapcore.LowercaseColorLevelEncoder
+	}
+	encodeTime := StringToEncoderTime["date"]
+	if opts.EncodeTime != "" {
+		encodeTime = StringToEncoderTime[opts.EncodeTime]
 	}
 
 	encoderConfig := zapcore.EncoderConfig{
@@ -236,9 +240,9 @@ func New(opts *Options) *zapLogger {
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    encodeLevel,
-		EncodeTime:     timeEncoder,
-		EncodeDuration: milliSecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
+		EncodeTime:     encodeTime,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.FullCallerEncoder,
 	}
 
 	loggerConfig := &zap.Config{
@@ -554,12 +558,6 @@ func (l *zapLogger) L(ctx context.Context) *zapLogger {
 
 	if requestID := ctx.Value(KeyRequestID); requestID != nil {
 		lg.zapLogger = lg.zapLogger.With(zap.Any(KeyRequestID, requestID))
-	}
-	if username := ctx.Value(KeyUsername); username != nil {
-		lg.zapLogger = lg.zapLogger.With(zap.Any(KeyUsername, username))
-	}
-	if watcherName := ctx.Value(KeyWatcherName); watcherName != nil {
-		lg.zapLogger = lg.zapLogger.With(zap.Any(KeyWatcherName, watcherName))
 	}
 
 	return lg

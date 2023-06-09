@@ -53,6 +53,7 @@ type Options struct {
 	EnableColor       bool     `json:"enable-color"       mapstructure:"enable-color"`
 	Development       bool     `json:"development"        mapstructure:"development"`
 	Name              string   `json:"name"               mapstructure:"name"`
+	EncodeTime        string   `json:"encode-time"        mapstructure:"encode-time"`
 }
 
 // NewOptions creates an Options object with default parameters.
@@ -64,6 +65,7 @@ func NewOptions() *Options {
 		Format:            consoleFormat,
 		EnableColor:       false,
 		Development:       false,
+		EncodeTime:        "date",
 		OutputPaths:       []string{"stdout"},
 		ErrorOutputPaths:  []string{"stderr"},
 	}
@@ -102,6 +104,10 @@ func (o *Options) Build() error {
 	if o.Format == consoleFormat && o.EnableColor {
 		encodeLevel = zapcore.CapitalColorLevelEncoder
 	}
+	encodeTime := StringToEncoderTime["date"]
+	if o.EncodeTime != "" {
+		encodeTime = StringToEncoderTime[o.EncodeTime]
+	}
 
 	zc := &zap.Config{
 		Level:             zap.NewAtomicLevelAt(zapLevel),
@@ -122,7 +128,7 @@ func (o *Options) Build() error {
 			StacktraceKey:  "stacktrace",
 			LineEnding:     zapcore.DefaultLineEnding,
 			EncodeLevel:    encodeLevel,
-			EncodeTime:     timeEncoder,
+			EncodeTime:     encodeTime,
 			EncodeDuration: milliSecondsDurationEncoder,
 			EncodeCaller:   zapcore.ShortCallerEncoder,
 			EncodeName:     zapcore.FullNameEncoder,
